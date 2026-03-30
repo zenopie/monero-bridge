@@ -72,18 +72,12 @@ class TransactionQueue:
     async def initialize(self) -> None:
         """Initialize the client connection. Call during app startup."""
         if self._client is None:
-            def _create():
-                loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(loop)
-                try:
-                    return AsyncLCDClient(
-                        chain_id=config.SECRET_CHAIN_ID,
-                        url=config.SECRET_LCD_URL
-                    )
-                finally:
-                    loop.close()
-
-            self._client = await asyncio.get_event_loop().run_in_executor(None, _create)
+            import nest_asyncio
+            nest_asyncio.apply()
+            self._client = AsyncLCDClient(
+                chain_id=config.SECRET_CHAIN_ID,
+                url=config.SECRET_LCD_URL
+            )
             self._wallet = self._client.wallet(MnemonicKey(config.WALLET_KEY))
             self._initialized = True
             logger.info("TransactionQueue: Client initialized")
