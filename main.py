@@ -1,5 +1,6 @@
 # /main.py
 import uvicorn
+import subprocess
 import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -9,6 +10,8 @@ import config
 from services.tx_queue import get_tx_queue
 from routers import monero_bridge
 from scheduled_tasks.monero_bridge import init_monero_bridge, poll_deposits
+
+wallet_rpc_process = None
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +36,22 @@ scheduler = AsyncIOScheduler()
 @app.on_event("startup")
 async def startup_event():
     """Initializes the bridge and starts the scheduler."""
+    global wallet_rpc_process
     print("\n[Startup] Monero Bridge starting...", flush=True)
+
+    # Start monero-wallet-rpc
+    wallet_rpc_process = subprocess.Popen([
+        "monero-wallet-rpc",
+        f"--daemon-host={config.MONERO_DAEMON_HOST}",
+        f"--daemon-port={config.MONERO_DAEMON_PORT}",
+        "--rpc-bind-ip=127.0.0.1",
+        "--rpc-bind-port=18083",
+        "--wallet-dir=/wallet",
+        "--disable-rpc-login",
+        "--non-interactive",
+        "--trusted-daemon",
+    ])
+    print(f"[Startup] wallet-rpc started (pid={wallet_rpc_process.pid})", flush=True)
 
     # Initialize transaction queue
     tx_queue = get_tx_queue()
@@ -53,6 +71,9 @@ async def shutdown_event():
     """Shuts down the scheduler and transaction queue."""
     scheduler.shutdown()
     await get_tx_queue().close()
+    if wallet_rpc_process:
+        wallet_rpc_process.terminate()
+        wallet_rpc_process.wait()
     print("Application shutdown.")
 
 # --- API Routers ---
