@@ -154,7 +154,11 @@ class MoneroWallet:
         }
 
     def get_subaddress(self, index: int, account_index: int = 0) -> str:
-        """Get subaddress by index."""
+        """Get subaddress by index, creating subaddresses up to that index if needed."""
+        all_addrs = self.get_all_subaddresses(account_index)
+        while len(all_addrs) <= index:
+            self.create_subaddress(account_index=account_index)
+            all_addrs = self.get_all_subaddresses(account_index)
         result = self._rpc_call("get_address", {
             "account_index": account_index,
             "address_index": [index],
