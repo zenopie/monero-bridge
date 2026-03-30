@@ -39,32 +39,39 @@ async def startup_event():
     global wallet_rpc_process
     print("\n[Startup] Monero Bridge starting...", flush=True)
 
-    # Start monero-wallet-rpc
-    wallet_rpc_process = subprocess.Popen([
-        "monero-wallet-rpc",
-        f"--daemon-host={config.MONERO_DAEMON_HOST}",
-        f"--daemon-port={config.MONERO_DAEMON_PORT}",
-        "--rpc-bind-ip=127.0.0.1",
-        "--rpc-bind-port=18083",
-        "--wallet-dir=/wallet",
-        "--disable-rpc-login",
-        "--non-interactive",
-        "--trusted-daemon",
-    ])
-    print(f"[Startup] wallet-rpc started (pid={wallet_rpc_process.pid})", flush=True)
+    try:
+        # Start monero-wallet-rpc
+        wallet_rpc_process = subprocess.Popen([
+            "monero-wallet-rpc",
+            f"--daemon-host={config.MONERO_DAEMON_HOST}",
+            f"--daemon-port={config.MONERO_DAEMON_PORT}",
+            "--rpc-bind-ip=127.0.0.1",
+            "--rpc-bind-port=18083",
+            "--wallet-dir=/wallet",
+            "--disable-rpc-login",
+            "--non-interactive",
+            "--trusted-daemon",
+        ])
+        print(f"[Startup] wallet-rpc started (pid={wallet_rpc_process.pid})", flush=True)
 
-    # Initialize transaction queue
-    tx_queue = get_tx_queue()
-    await tx_queue.initialize()
-    print(f"[Startup] TX Queue ready: {tx_queue.wallet_address}", flush=True)
+        # Initialize transaction queue
+        tx_queue = get_tx_queue()
+        await tx_queue.initialize()
+        print(f"[Startup] TX Queue ready: {tx_queue.wallet_address}", flush=True)
 
-    # Initialize Monero bridge
-    await init_monero_bridge()
-    if config.MONERO_BRIDGE_ENABLED:
-        scheduler.add_job(poll_deposits, 'interval', seconds=120, id='monero_deposit_poll')
+        # Initialize Monero bridge
+        await init_monero_bridge()
+        if config.MONERO_BRIDGE_ENABLED:
+            scheduler.add_job(poll_deposits, 'interval', seconds=120, id='monero_deposit_poll')
 
-    scheduler.start()
-    print("[Startup] Ready\n", flush=True)
+        scheduler.start()
+        print("[Startup] Ready\n", flush=True)
+
+    except Exception as e:
+        import traceback
+        print(f"[Startup] FATAL ERROR: {e}", flush=True)
+        traceback.print_exc()
+        raise
 
 @app.on_event("shutdown")
 async def shutdown_event():
