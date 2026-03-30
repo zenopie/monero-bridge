@@ -7,12 +7,11 @@ WORKDIR /app
 
 COPY requirements.txt .
 
-# Install system dependencies + supervisor + wget for monero binaries
+# Install system dependencies + wget for monero binaries
 RUN apt-get update && apt-get install -y \
     build-essential \
     pkg-config \
     git \
-    supervisor \
     wget \
     bzip2 \
     && rm -rf /var/lib/apt/lists/*
@@ -31,9 +30,6 @@ RUN mkdir -p /wallet
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
-
-# Copy supervisord config
-COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
