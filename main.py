@@ -15,6 +15,9 @@ wallet_rpc_process = None
 
 logger = logging.getLogger(__name__)
 
+# Create LCD client before event loop starts (sync RegistrationAPI call in __init__)
+get_tx_queue()._client = get_tx_queue()._create_client()
+
 app = FastAPI(
     title="Monero Bridge API",
     description="XMR-SNIP20 bridge backend for Erth Network.",
