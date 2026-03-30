@@ -10,9 +10,7 @@ services:
       - "8000:8000"
     volumes:
       - monero-wallet-data:/wallet
-      - monero-blockchain-data:/monero-data
     restart: unless-stopped
 
 volumes:
   monero-wallet-data:
-  monero-blockchain-data:

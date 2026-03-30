@@ -45,6 +45,10 @@ XMR_MINTER_HASH = os.getenv(
 )
 
 # --- Monero Bridge Configuration ---
+# Remote Monero daemon (for wallet-rpc to connect to)
+MONERO_DAEMON_HOST = os.getenv("MONERO_DAEMON_HOST", "node.moneroworld.com")
+MONERO_DAEMON_PORT = os.getenv("MONERO_DAEMON_PORT", "18089")
+
 # Monero wallet-rpc URL (local, managed by supervisord)
 MONERO_WALLET_RPC_URL = os.getenv("MONERO_WALLET_RPC_URL", "http://127.0.0.1:18083")
 

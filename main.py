@@ -43,7 +43,7 @@ async def startup_event():
     # Initialize Monero bridge
     await init_monero_bridge()
     if config.MONERO_BRIDGE_ENABLED:
-        scheduler.add_job(poll_deposits, 'interval', seconds=30, id='monero_deposit_poll')
+        scheduler.add_job(poll_deposits, 'interval', seconds=120, id='monero_deposit_poll')
 
     scheduler.start()
     print("[Startup] Ready\n", flush=True)
