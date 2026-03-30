@@ -1,0 +1,18 @@
+services:
+  monero-bridge:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    platform: linux/amd64
+    env_file:
+      - .env
+    ports:
+      - "8001:8000"
+    volumes:
+      - monero-wallet-data:/wallet
+      - monero-blockchain-data:/monero-data
+    restart: unless-stopped
+
+volumes:
+  monero-wallet-data:
+  monero-blockchain-data:

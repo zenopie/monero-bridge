@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+git+https://github.com/scrtlabs/secret-sdk-python.git
+requests
+apscheduler
+setuptools
