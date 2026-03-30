@@ -69,20 +69,17 @@ class TransactionQueue:
             cls._instance = TransactionQueue()
         return cls._instance
 
-    def _create_client(self) -> AsyncLCDClient:
-        """Create the LCD client. Must be called before the event loop starts."""
-        return AsyncLCDClient(
-            chain_id=config.SECRET_CHAIN_ID,
-            url=config.SECRET_LCD_URL
-        )
-
     async def initialize(self) -> None:
         """Initialize the client connection. Call during app startup."""
         if self._client is None:
-            raise RuntimeError(
-                "TransactionQueue client not created. Call _create_client() before the event loop starts."
+            loop = asyncio.get_event_loop()
+            self._client = await loop.run_in_executor(
+                None,
+                lambda: AsyncLCDClient(
+                    chain_id=config.SECRET_CHAIN_ID,
+                    url=config.SECRET_LCD_URL
+                )
             )
-        if not self._initialized:
             self._wallet = self._client.wallet(MnemonicKey(config.WALLET_KEY))
             self._initialized = True
             logger.info("TransactionQueue: Client initialized")
